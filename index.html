@@ -6,48 +6,23 @@
     <title>Private Vault</title>
     <style>
         :root {
-            --bg: #111;
-            --card-bg: #222;
-            --text: #fff;
-            --input-bg: #fff;
-            --input-text: #000;
-            --accent: #007bff;
-            --success: #28a745;
-            --danger: #dc3545;
+            --bg: #111; --card-bg: #222; --text: #fff; --input-bg: #fff; --input-text: #000;
+            --accent: #007bff; --success: #28a745; --danger: #dc3545; --border: #444;
         }
-        
         body.light {
-            --bg: #f4f4f4;
-            --card-bg: #fff;
-            --text: #111;
-            --input-bg: #eee;
-            --input-text: #000;
+            --bg: #f4f4f4; --card-bg: #fff; --text: #111; --input-bg: #eee; --input-text: #000; --border: #ccc;
         }
-
         body { 
-            font-family: sans-serif; 
-            background: var(--bg); 
-            color: var(--text); 
-            text-align: center; 
-            padding: 20px; 
-            transition: background 0.3s, color 0.3s;
+            font-family: sans-serif; background: var(--bg); color: var(--text); 
+            text-align: center; padding: 20px; transition: background 0.3s, color 0.3s; 
         }
         .container { 
-            max-width: 400px; 
-            margin: 0 auto; 
-            background: var(--card-bg); 
-            padding: 20px; 
-            border-radius: 10px; 
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            max-width: 450px; margin: 0 auto; background: var(--card-bg); 
+            padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
         input, select, button { 
-            margin: 10px 0; 
-            padding: 12px; 
-            border: none; 
-            border-radius: 8px; 
-            width: 100%; 
-            box-sizing: border-box; 
-            font-size: 16px;
+            margin: 8px 0; padding: 12px; border: none; border-radius: 8px; 
+            width: 100%; box-sizing: border-box; font-size: 16px; 
         }
         input { background: var(--input-bg); color: var(--input-text); }
         button { background: var(--accent); color: white; cursor: pointer; font-weight: bold; }
@@ -56,56 +31,84 @@
         .danger-btn { background: var(--danger); }
         .hidden { display: none; }
         .service-item { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center;
-            background: rgba(255,255,255,0.1); 
-            padding: 10px; 
-            margin: 5px 0; 
-            border-radius: 8px; 
-            text-align: left;
+            display: flex; justify-content: space-between; align-items: center;
+            background: rgba(128,128,128,0.1); padding: 10px; margin: 8px 0; 
+            border-radius: 8px; text-align: left; gap: 10px;
         }
+        .service-item .btn-group { display: flex; gap: 5px; }
         .service-item button { width: auto; padding: 5px 10px; margin: 0; }
-        .theme-switcher { display: flex; justify-content: center; gap: 5px; margin-bottom: 10px; }
-        .theme-switcher button { width: auto; padding: 5px 10px; font-size: 12px; }
+        .theme-switcher, .lang-switcher { display: flex; justify-content: center; gap: 5px; margin-bottom: 10px; }
+        .theme-switcher button, .lang-switcher button { width: auto; padding: 5px 10px; font-size: 12px; }
         .lock-icon { font-size: 50px; margin-bottom: 10px; }
         #status { margin-top: 15px; font-size: 14px; color: #888; min-height: 20px; }
+
+        /* Модальное окно для подтверждения */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); display: flex; justify-content: center; 
+            align-items: center; z-index: 1000;
+        }
+        .modal-box {
+            background: var(--card-bg); padding: 20px; border-radius: 12px; 
+            max-width: 300px; width: 90%; text-align: center;
+            border: 1px solid var(--border);
+        }
+        .modal-box h3 { margin-top: 0; }
+        .modal-box .modal-buttons { display: flex; gap: 10px; margin-top: 15px; }
+        .modal-box button { margin: 0; }
+        .modal-box .btn-cancel { background: #555; }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- ПЕРЕКЛЮЧАТЕЛЬ ТЕМ -->
+        <!-- ПЕРЕКЛЮЧАТЕЛИ -->
         <div class="theme-switcher">
             <button onclick="setTheme('light')">☀️ Светлая</button>
             <button onclick="setTheme('dark')">🌙 Тёмная</button>
             <button onclick="setTheme('system')">💻 Системная</button>
         </div>
+        <div class="lang-switcher">
+            <button onclick="setLang('ru')" id="langRu">🇷🇺 RU</button>
+            <button onclick="setLang('en')" id="langEn">🇬🇧 EN</button>
+        </div>
 
         <!-- ЭКРАН ВХОДА -->
         <div id="loginScreen">
             <div class="lock-icon">🔒</div>
-            <h2>Private Vault</h2>
-            <input type="password" id="pinInput" placeholder="Введи пароль" onkeydown="if(event.key==='Enter') tryLogin()">
-            <button onclick="tryLogin()">Войти</button>
-            <button onclick="resetVault()" class="danger-btn" style="font-size:12px; background:transparent; color:#ff6b6b;">Впервые? Сбросить всё</button>
+            <h2 data-lang="title">Private Vault</h2>
+            <input type="password" id="pinInput" data-lang="pinPlaceholder" placeholder="Введи пароль" onkeydown="if(event.key==='Enter') tryLogin()">
+            <button onclick="tryLogin()" data-lang="loginBtn">Войти</button>
+            <button onclick="resetVault()" class="danger-btn" style="font-size:12px; background:transparent; color:#ff6b6b;" data-lang="resetBtn">Впервые? Сбросить всё</button>
             <div id="status"></div>
         </div>
 
         <!-- ГЛАВНЫЙ ЭКРАН -->
         <div id="vaultScreen" class="hidden">
-            <h2>🔐 Твой Сейф</h2>
-            <input type="text" id="searchInput" placeholder="🔍 Поиск по сервису...">
+            <h2 data-lang="vaultTitle">🔐 Твой Сейф</h2>
+            <input type="text" id="searchInput" data-lang="searchPlaceholder" placeholder="🔍 Поиск по сервису...">
             <div id="vault"></div>
             <br>
-            <button onclick="openAddForm()">+ Добавить сервис</button>
-            <button onclick="saveToFile()" class="success-btn">💾 Скачать файл</button>
-            <button onclick="logout()" style="background:#555;">Выйти</button>
+            <button onclick="openAddForm()" data-lang="addBtn">+ Добавить сервис</button>
+            <button onclick="saveToFile()" class="success-btn" data-lang="downloadBtn">💾 Скачать файл</button>
+            <button onclick="logout()" style="background:#555;" data-lang="logoutBtn">Выйти</button>
             
             <div id="addForm" class="hidden">
-                <input type="text" id="accName" placeholder="Название сайта / Сервиса">
-                <input type="text" id="accLogin" placeholder="Логин или Номер">
-                <input type="text" id="accPass" placeholder="Пароль">
-                <button onclick="addService()">Добавить</button>
+                <input type="text" id="accName" data-lang="accNamePlaceholder" placeholder="Название сайта">
+                <input type="text" id="accLogin" data-lang="accLoginPlaceholder" placeholder="Логин или Номер">
+                <input type="text" id="accPass" data-lang="accPassPlaceholder" placeholder="Пароль">
+                <button onclick="addService()" data-lang="addServiceBtn">Добавить</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- МОДАЛЬНОЕ ОКНО ПОДТВЕРЖДЕНИЯ -->
+    <div id="confirmModal" class="modal-overlay hidden">
+        <div class="modal-box">
+            <h3 id="modalTitle">Подтвердите действие</h3>
+            <p id="modalText">Вы уверены?</p>
+            <div class="modal-buttons">
+                <button onclick="closeModal()" class="btn-cancel" data-lang="cancelBtn">Отмена</button>
+                <button onclick="confirmAction()" class="danger-btn" data-lang="okBtn">OK</button>
             </div>
         </div>
     </div>
@@ -114,10 +117,60 @@
         // --- ДАННЫЕ ---
         let masterPin = localStorage.getItem('vault_pin') || "";
         let vaultData = JSON.parse(localStorage.getItem('vault_data') || "[]");
-        let isLoggedIn = false;
+        let currentLang = localStorage.getItem('vault_lang') || 'ru';
+        let pendingAction = null; // Для модального окна
+
+        // --- ПЕРЕВОДЫ ---
+        const translations = {
+            ru: {
+                title: "Private Vault", pinPlaceholder: "Введи пароль", loginBtn: "Войти",
+                resetBtn: "Впервые? Сбросить всё", vaultTitle: "🔐 Твой Сейф",
+                searchPlaceholder: "🔍 Поиск по сервису...", addBtn: "+ Добавить сервис",
+                downloadBtn: "💾 Скачать файл", logoutBtn: "Выйти",
+                accNamePlaceholder: "Название сайта", accLoginPlaceholder: "Логин или Номер",
+                accPassPlaceholder: "Пароль", addServiceBtn: "Добавить", cancelBtn: "Отмена",
+                okBtn: "OK", confirmTitle: "Подтвердите действие",
+                confirmDelete: "Удалить этот сервис?", confirmReset: "Сбросить все данные?",
+                resetDone: "Сброшено. Введи новый пароль для создания сейфа.",
+                wrongPin: "❌ Неверный PIN!", pinSet: "✅ Ключ установлен! Войди снова для проверки.",
+                fileDownloaded: "✅ Файл скачан!", noData: "❌ Нет данных для скачивания.",
+                emptyVault: "Пока пусто. Добавь первый сервис!"
+            },
+            en: {
+                title: "Private Vault", pinPlaceholder: "Enter password", loginBtn: "Login",
+                resetBtn: "First time? Reset all", vaultTitle: "🔐 Your Vault",
+                searchPlaceholder: "🔍 Search service...", addBtn: "+ Add service",
+                downloadBtn: "💾 Download file", logoutBtn: "Logout",
+                accNamePlaceholder: "Service name", accLoginPlaceholder: "Login or Number",
+                accPassPlaceholder: "Password", addServiceBtn: "Add", cancelBtn: "Cancel",
+                okBtn: "OK", confirmTitle: "Confirm action",
+                confirmDelete: "Delete this service?", confirmReset: "Reset all data?",
+                resetDone: "Reset done. Enter new password to create vault.",
+                wrongPin: "❌ Wrong PIN!", pinSet: "✅ Key set! Login again to verify.",
+                fileDownloaded: "✅ File downloaded!", noData: "❌ No data to download.",
+                emptyVault: "Empty. Add your first service!"
+            }
+        };
+
+        function setLang(lang) {
+            currentLang = lang;
+            localStorage.setItem('vault_lang', lang);
+            document.querySelectorAll('[data-lang]').forEach(el => {
+                const key = el.getAttribute('data-lang');
+                if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+                    el.placeholder = translations[lang][key];
+                } else {
+                    el.textContent = translations[lang][key];
+                }
+            });
+        }
 
         // --- ТЕМЫ ---
         function setTheme(theme) {
+            localStorage.setItem('vault_theme', theme);
+            applyTheme(theme);
+        }
+        function applyTheme(theme) {
             if (theme === 'light') document.body.classList.add('light');
             else if (theme === 'dark') document.body.classList.remove('light');
             else if (theme === 'system') {
@@ -127,11 +180,11 @@
                     document.body.classList.remove('light');
                 }
             }
-            localStorage.setItem('vault_theme', theme);
         }
-        // Применяем сохраненную тему при загрузке
-        const savedTheme = localStorage.getItem('vault_theme') || 'system';
-        setTheme(savedTheme);
+        // Автообновление при смене системной темы
+        window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', () => {
+            if (localStorage.getItem('vault_theme') === 'system') applyTheme('system');
+        });
 
         // --- ЛОГИН ---
         function tryLogin() {
@@ -141,33 +194,30 @@
             if (masterPin === "") {
                 masterPin = pin;
                 localStorage.setItem('vault_pin', masterPin);
-                document.getElementById('status').innerText = "✅ Ключ установлен!";
-                isLoggedIn = true;
-                showVault();
+                document.getElementById('status').innerText = translations[currentLang].pinSet;
+                document.getElementById('pinInput').value = '';
                 return;
             }
             
             if (pin === masterPin) {
-                isLoggedIn = true;
                 showVault();
             } else {
-                document.getElementById('status').innerText = "❌ Неверный PIN!";
+                document.getElementById('status').innerText = translations[currentLang].wrongPin;
             }
         }
 
         function resetVault() {
-            if(confirm("Ты уверен? Все сохраненные пароли удалятся!")) {
+            showModal(translations[currentLang].confirmReset, () => {
                 localStorage.removeItem('vault_pin');
                 localStorage.removeItem('vault_data');
                 masterPin = "";
                 vaultData = [];
                 document.getElementById('pinInput').value = '';
-                document.getElementById('status').innerText = "Сброшено. Введи новый пароль для создания сейфа.";
-            }
+                document.getElementById('status').innerText = translations[currentLang].resetDone;
+            });
         }
 
         function logout() {
-            isLoggedIn = false;
             document.getElementById('vaultScreen').classList.add('hidden');
             document.getElementById('loginScreen').classList.remove('hidden');
             document.getElementById('pinInput').value = '';
@@ -194,7 +244,7 @@
             if (!service || !login || !pass) return;
             
             vaultData.push({ service, login, pass });
-            localStorage.setItem('vault_data', JSON.stringify(vaultData)); // СОХРАНЕНИЕ
+            localStorage.setItem('vault_data', JSON.stringify(vaultData));
             
             document.getElementById('accName').value = '';
             document.getElementById('accLogin').value = '';
@@ -208,12 +258,11 @@
             let html = "";
             
             if (vaultData.length === 0) {
-                html = "<p style='text-align:center;'>Пока пусто. Добавь первый сервис!</p>";
+                html = `<p style='text-align:center;'>${translations[currentLang].emptyVault}</p>`;
             } else {
                 for (let i = 0; i < vaultData.length; i++) {
                     let item = vaultData[i];
                     if (item.service.toLowerCase().includes(search) || item.login.toLowerCase().includes(search)) {
-                        // Группировка +2
                         let count = 0;
                         for (let j = 0; j < vaultData.length; j++) {
                             if (vaultData[j].service.toLowerCase() === item.service.toLowerCase()) count++;
@@ -222,8 +271,8 @@
                         
                         html += `<div class="service-item">
                                     <span><b>${item.service}</b> <small>${item.login}</small> ${ext}</span>
-                                    <div>
-                                        <button onclick="revealPass(${i})">👁</button>
+                                    <div class="btn-group">
+                                        <button onclick="revealPass(${i})" style="background:#007bff;">👁</button>
                                         <button onclick="deleteService(${i})" style="background:#dc3545;">✖</button>
                                     </div>
                                 </div>`;
@@ -238,20 +287,39 @@
         }
 
         function deleteService(index) {
-            if(confirm("Удалить этот сервис?")) {
+            showModal(translations[currentLang].confirmDelete, () => {
                 vaultData.splice(index, 1);
-                localStorage.setItem('vault_data', JSON.stringify(vaultData)); // СОХРАНЕНИЕ
+                localStorage.setItem('vault_data', JSON.stringify(vaultData));
                 renderList();
-            }
+            });
         }
 
-        // --- СКАЧИВАНИЕ ---
+        // --- МОДАЛЬНОЕ ОКНО ---
+        function showModal(text, action) {
+            document.getElementById('modalText').innerText = text;
+            document.getElementById('modalTitle').innerText = translations[currentLang].confirmTitle;
+            pendingAction = action;
+            document.getElementById('confirmModal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('confirmModal').classList.add('hidden');
+            pendingAction = null;
+        }
+
+        function confirmAction() {
+            if (pendingAction) pendingAction();
+            closeModal();
+        }
+
+        // --- СКАЧИВАНИЕ (Красивое форматирование) ---
         function saveToFile() {
             if (vaultData.length === 0) {
-                document.getElementById('status').innerText = "❌ Нет данных для скачивания.";
+                document.getElementById('status').innerText = translations[currentLang].noData;
                 return;
             }
-            let dataStr = JSON.stringify(vaultData);
+            // Красивое форматирование JSON с отступами
+            let dataStr = JSON.stringify(vaultData, null, 2);
             let blob = new Blob([dataStr], { type: 'application/json' });
             let url = URL.createObjectURL(blob);
             let a = document.createElement('a');
@@ -261,8 +329,12 @@
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
-            document.getElementById('status').innerText = "✅ Файл скачан!";
+            document.getElementById('status').innerText = translations[currentLang].fileDownloaded;
         }
+
+        // --- ИНИЦИАЛИЗАЦИЯ ---
+        setLang(currentLang);
+        applyTheme(localStorage.getItem('vault_theme') || 'system');
     </script>
 </body>
-</html>
+    </html>
