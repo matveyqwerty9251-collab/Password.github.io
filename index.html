@@ -2,83 +2,187 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ONIX</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ONIX — Сейф паролей</title>
     <style>
         :root {
-            --bg: #111; --card-bg: #1a1a1a; --text: #fff; --input-bg: #fff; --input-text: #000;
-            --accent: #007bff; --success: #28a745; --danger: #dc3545; --border: #444;
+            --bg: #111; 
+            --card-bg: #1a1a1a; 
+            --text: #fff; 
+            --input-bg: #2a2a2a; 
+            --input-text: #fff;
+            --accent: #007bff; 
+            --success: #28a745; 
+            --danger: #dc3545; 
+            --border: #333;
             --onix-red: #e63946;
         }
         body.light {
-            --bg: #f4f4f4; --card-bg: #fff; --text: #111; --input-bg: #eee; --input-text: #000; --border: #ccc;
+            --bg: #f4f4f4; 
+            --card-bg: #fff; 
+            --text: #111; 
+            --input-bg: #eee; 
+            --input-text: #000; 
+            --border: #ccc;
         }
-        * { box-sizing: border-box; }
+        
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
         body { 
-            font-family: sans-serif; background: var(--bg); color: var(--text); 
-            margin: 0; padding: 20px; transition: background 0.3s, color 0.3s; 
-            display: flex; justify-content: center; align-items: flex-start; min-height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: var(--bg); 
+            color: var(--text); 
+            margin: 0; 
+            padding: 15px; 
+            transition: background 0.3s, color 0.3s; 
+            display: flex; 
+            justify-content: center; 
+            align-items: flex-start; 
+            min-height: 100vh;
+            overflow-x: hidden;
         }
+        
         .container { 
-            width: 100%; max-width: 480px; background: var(--card-bg); 
-            padding: 25px; border-radius: 16px; box-shadow: 0 8px 30px rgba(0,0,0,0.4);
-        }
-        @media (min-width: 768px) {
-            .container { max-width: 550px; padding: 35px; }
-            body { padding: 40px 20px; }
+            width: 100%; 
+            max-width: 480px; 
+            background: var(--card-bg); 
+            padding: 20px; 
+            border-radius: 16px; 
+            box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+            position: relative;
         }
         
         h1.onix-title {
             color: var(--onix-red);
-            font-size: 42px;
+            font-size: 38px;
             letter-spacing: 4px;
-            margin: 15px 0 5px 0;
-            text-shadow: 0 0 20px rgba(230, 57, 70, 0.3);
+            margin: 10px 0 5px 0;
+            text-shadow: 0 0 20px rgba(230, 57, 70, 0.4);
+            text-align: center;
         }
+        
         p.onix-subtitle {
             color: var(--onix-red);
             font-size: 14px;
             margin: 0 0 25px 0;
             opacity: 0.85;
+            text-align: center;
         }
         
-        input, select, button { 
-            margin: 8px 0; padding: 14px; border: none; border-radius: 10px; 
-            width: 100%; box-sizing: border-box; font-size: 16px; 
+        input, button { 
+            margin: 8px 0; 
+            padding: 14px; 
+            border: none; 
+            border-radius: 10px; 
+            width: 100%; 
+            font-size: 16px; 
             transition: all 0.2s ease;
+            font-family: inherit;
         }
-        input { background: var(--input-bg); color: var(--input-text); }
-        button { background: var(--accent); color: white; cursor: pointer; font-weight: bold; }
-        button:active { transform: scale(0.98); opacity: 0.9; }
+        
+        input { 
+            background: var(--input-bg); 
+            color: var(--input-text); 
+            border: 1px solid var(--border);
+        }
+        
+        input:focus { outline: none; border-color: var(--accent); }
+        
+        button { 
+            background: var(--accent); 
+            color: white; 
+            cursor: pointer; 
+            font-weight: 600; 
+        }
+        
+        button:active { transform: scale(0.97); opacity: 0.9; }
+        
         .success-btn { background: var(--success); }
         .danger-btn { background: var(--danger); }
         .hidden { display: none !important; }
         
-        .service-item { 
-            display: flex; justify-content: space-between; align-items: center;
-            background: rgba(128,128,128,0.1); padding: 12px; margin: 10px 0; 
-            border-radius: 10px; text-align: left; gap: 10px;
+        /* Переключатели */
+        .theme-switcher, .lang-switcher { 
+            display: flex; 
+            justify-content: center; 
+            gap: 5px; 
+            margin-bottom: 10px; 
+            flex-wrap: wrap; 
+        }
+        .theme-switcher button, .lang-switcher button { 
+            width: auto; 
+            padding: 6px 12px; 
+            font-size: 12px; 
+            border-radius: 20px; 
+            background: var(--input-bg);
+            color: var(--text);
             border: 1px solid var(--border);
         }
-        .service-item .info { flex: 1; min-width: 0; }
-        .service-item .info b { display: block; margin-bottom: 3px; }
-        .service-item .info small { color: #888; word-break: break-all; }
-        .service-item .pass-display { 
-            font-family: monospace; color: var(--success); 
-            word-break: break-all; font-size: 13px; margin-top: 5px;
-            background: rgba(40, 167, 69, 0.1); padding: 3px 6px; border-radius: 4px;
+        
+        /* Список сервисов */
+        .service-item { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            background: rgba(128,128,128,0.08); 
+            padding: 12px; 
+            margin: 10px 0; 
+            border-radius: 10px; 
+            gap: 10px;
+            border: 1px solid var(--border);
+            animation: fadeIn 0.3s ease;
         }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .service-item .info { flex: 1; min-width: 0; }
+        .service-item .info b { display: block; margin-bottom: 3px; font-size: 16px; }
+        .service-item .info small { color: #888; word-break: break-all; display: block; }
+        
+        .service-item .pass-display { 
+            font-family: monospace; 
+            color: var(--success); 
+            word-break: break-all; 
+            font-size: 14px; 
+            margin-top: 8px;
+            background: rgba(40, 167, 69, 0.15); 
+            padding: 4px 8px; 
+            border-radius: 6px;
+            display: inline-block;
+        }
+        
         .service-item .btn-group { display: flex; gap: 5px; flex-shrink: 0; }
-        .service-item button { width: auto; padding: 8px 10px; margin: 0; font-size: 14px; }
+        .service-item button { 
+            width: auto; 
+            padding: 8px 12px; 
+            margin: 0; 
+            font-size: 14px; 
+            background: var(--input-bg);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+        .service-item button:hover { background: var(--border); }
         
-        .theme-switcher, .lang-switcher { display: flex; justify-content: center; gap: 5px; margin-bottom: 10px; flex-wrap: wrap; }
-        .theme-switcher button, .lang-switcher button { width: auto; padding: 6px 12px; font-size: 13px; border-radius: 20px; }
+        #status { 
+            margin-top: 15px; 
+            font-size: 14px; 
+            color: #888; 
+            min-height: 20px; 
+            text-align: center;
+        }
         
-        #status { margin-top: 15px; font-size: 14px; color: #888; min-height: 20px; }
+        .reset-link {
+            background: transparent !important;
+            color: var(--danger) !important;
+            border: 1px solid var(--danger) !important;
+            font-size: 13px !important;
+            margin-top: 15px !important;
+        }
     </style>
 </head>
 <body>
     <div class="container">
+        <!-- Переключатели темы и языка -->
         <div class="theme-switcher">
             <button onclick="setTheme('light')">☀️ Светлая</button>
             <button onclick="setTheme('dark')">🌙 Тёмная</button>
@@ -93,38 +197,55 @@
         <div id="loginScreen">
             <h1 class="onix-title">ONIX</h1>
             <p class="onix-subtitle" data-lang="subtitle">Твой безопасный сейф паролей</p>
+            
             <input type="password" id="pinInput" data-lang="pinPlaceholder" placeholder="Введи пароль" maxlength="30" onkeydown="if(event.key==='Enter') tryLogin()">
             <button onclick="tryLogin()" data-lang="loginBtn">Войти</button>
-            <button onclick="resetVault()" class="danger-btn" style="font-size:12px; background:transparent; color:#ff6b6b; border:1px solid #ff6b6b;" data-lang="resetBtn">Впервые? Сбросить всё</button>
+            <button onclick="resetVault()" class="reset-link" data-lang="resetBtn">Впервые? Сбросить всё</button>
             <div id="status"></div>
         </div>
 
         <!-- ГЛАВНЫЙ ЭКРАН -->
         <div id="vaultScreen" class="hidden">
-            <h1 class="onix-title" style="font-size: 32px;">ONIX</h1>
+            <h1 class="onix-title" style="font-size: 28px;">ONIX</h1>
             <p class="onix-subtitle" data-lang="subtitle">Твой безопасный сейф паролей</p>
-            <input type="text" id="searchInput" data-lang="searchPlaceholder" placeholder="🔍 Поиск по сервису..." maxlength="30">
-            <div id="vault"></div>
-            <br>
-            <button onclick="openAddForm()" data-lang="addBtn">+ Добавить сервис</button>
-            <button onclick="saveToFile()" class="success-btn" data-lang="downloadBtn">💾 Скачать файл</button>
-            <button onclick="logout()" style="background:#555;" data-lang="logoutBtn">Выйти</button>
             
-            <div id="addForm" class="hidden">
+            <input type="text" id="searchInput" data-lang="searchPlaceholder" placeholder="🔍 Поиск по сервису..." maxlength="30">
+            
+            <div id="vault"></div>
+            
+            <button onclick="openAddForm()" data-lang="addBtn" style="margin-top: 15px;">+ Добавить сервис</button>
+            
+            <div id="addForm" class="hidden" style="margin-top: 10px; padding: 15px; background: rgba(128,128,128,0.1); border-radius: 10px; border: 1px solid var(--border);">
                 <input type="text" id="accName" data-lang="accNamePlaceholder" placeholder="Название сайта" maxlength="30">
                 <input type="text" id="accLogin" data-lang="accLoginPlaceholder" placeholder="Логин или Номер" maxlength="30">
                 <input type="text" id="accPass" data-lang="accPassPlaceholder" placeholder="Пароль" maxlength="30">
-                <button onclick="addService()" data-lang="addServiceBtn">Добавить</button>
+                <button onclick="addService()" data-lang="addServiceBtn" class="success-btn">Добавить</button>
             </div>
+
+            <button onclick="saveToFile()" class="success-btn" data-lang="downloadBtn" style="margin-top: 15px;">💾 Скачать файл</button>
+            <button onclick="logout()" style="background:#555;" data-lang="logoutBtn">Выйти</button>
         </div>
     </div>
 
     <script>
+        // --- СОСТОЯНИЕ ---
         let masterPin = localStorage.getItem('vault_pin') || "";
-        let vaultData = JSON.parse(localStorage.getItem('vault_data') || "[]");
+        let vaultData = [];
         let currentLang = localStorage.getItem('vault_lang') || 'ru';
         let revealedPasswords = new Set();
 
+        // Дешифровка данных при загрузке (Base64)
+        try {
+            const savedData = localStorage.getItem('vault_data');
+            if (savedData) {
+                vaultData = JSON.parse(atob(savedData));
+            }
+        } catch (e) {
+            console.error("Ошибка чтения данных", e);
+            vaultData = [];
+        }
+
+        // --- ПЕРЕВОДЫ ---
         const translations = {
             ru: {
                 subtitle: "Твой безопасный сейф паролей",
@@ -134,12 +255,13 @@
                 downloadBtn: "💾 Скачать файл", logoutBtn: "Выйти",
                 accNamePlaceholder: "Название сайта", accLoginPlaceholder: "Логин или Номер",
                 accPassPlaceholder: "Пароль", addServiceBtn: "Добавить",
-                wrongPin: "❌ Неверный PIN!", pinSet: "✅ Ключ установлен! Войди снова.",
+                wrongPin: "❌ Неверный PIN!", pinSet: "✅ Ключ установлен! Сейф открыт.",
                 fileDownloaded: "✅ Файл скачан!", noData: "❌ Нет данных.",
                 emptyVault: "Пока пусто. Добавь первый сервис!",
                 resetDone: "✅ Сброшено. Введи новый пароль.",
                 resetCancel: "❌ Отменено.",
-                resetConfirm: "Сбросить все данные? Напиши 'ДА' в поле пароля."
+                resetConfirm: "Сбросить все данные? Напиши 'ДА' в поле пароля.",
+                fillAllFields: "⚠️ Заполните все поля!"
             },
             en: {
                 subtitle: "Your safe password vault",
@@ -149,15 +271,17 @@
                 downloadBtn: "💾 Download file", logoutBtn: "Logout",
                 accNamePlaceholder: "Service name", accLoginPlaceholder: "Login or Number",
                 accPassPlaceholder: "Password", addServiceBtn: "Add",
-                wrongPin: "❌ Wrong PIN!", pinSet: "✅ Key set! Login again.",
+                wrongPin: "❌ Wrong PIN!", pinSet: "✅ Key set! Vault opened.",
                 fileDownloaded: "✅ File downloaded!", noData: "❌ No data.",
                 emptyVault: "Empty. Add your first service!",
                 resetDone: "✅ Reset done. Enter new password.",
                 resetCancel: "❌ Cancelled.",
-                resetConfirm: "Reset all data? Type 'YES' in password field."
+                resetConfirm: "Reset all data? Type 'YES' in password field.",
+                fillAllFields: "⚠️ Fill all fields!"
             }
         };
 
+        // --- ФУНКЦИИ ЛОКАЛИЗАЦИИ И ТЕМ ---
         function setLang(lang) {
             currentLang = lang;
             localStorage.setItem('vault_lang', lang);
@@ -175,38 +299,55 @@
             localStorage.setItem('vault_theme', theme);
             applyTheme(theme);
         }
+
         function applyTheme(theme) {
-            if (theme === 'light') document.body.classList.add('light');
-            else if (theme === 'dark') document.body.classList.remove('light');
-            else if (theme === 'system') {
-                if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
-                    document.body.classList.add('light');
-                } else {
-                    document.body.classList.remove('light');
-                }
-            }
+            const isLight = theme === 'light' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: light)').matches);
+            document.body.classList.toggle('light', isLight);
         }
+
         window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', () => {
             if (localStorage.getItem('vault_theme') === 'system') applyTheme('system');
         });
 
+        // --- ЛОГИКА ВХОДА ---
         function tryLogin() {
             const pin = document.getElementById('pinInput').value.trim();
+            const statusEl = document.getElementById('status');
+            
             if (pin.length < 1) return;
             
+            // Если пароля еще нет - устанавливаем его и сразу входим
             if (masterPin === "") {
                 masterPin = pin;
                 localStorage.setItem('vault_pin', masterPin);
-                document.getElementById('status').innerText = translations[currentLang].pinSet;
+                statusEl.innerText = translations[currentLang].pinSet;
                 document.getElementById('pinInput').value = '';
+                showVault();
                 return;
             }
             
+            // Проверка пароля
             if (pin === masterPin) {
+                statusEl.innerText = "";
                 showVault();
             } else {
-                document.getElementById('status').innerText = translations[currentLang].wrongPin;
+                statusEl.innerText = translations[currentLang].wrongPin;
+                document.getElementById('pinInput').value = '';
             }
+        }
+
+        function showVault() {
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('vaultScreen').classList.remove('hidden');
+            renderList();
+        }
+
+        function logout() {
+            document.getElementById('vaultScreen').classList.add('hidden');
+            document.getElementById('loginScreen').classList.remove('hidden');
+            document.getElementById('pinInput').value = '';
+            document.getElementById('status').innerText = "";
+            revealedPasswords.clear();
         }
 
         function resetVault() {
@@ -224,20 +365,7 @@
             }
         }
 
-        function logout() {
-            document.getElementById('vaultScreen').classList.add('hidden');
-            document.getElementById('loginScreen').classList.remove('hidden');
-            document.getElementById('pinInput').value = '';
-            document.getElementById('status').innerText = "";
-            revealedPasswords.clear();
-        }
-
-        function showVault() {
-            document.getElementById('loginScreen').classList.add('hidden');
-            document.getElementById('vaultScreen').classList.remove('hidden');
-            renderList();
-        }
-
+        // --- ЛОГИКА СЕЙФА ---
         document.getElementById('searchInput').addEventListener('input', renderList);
 
         function openAddForm() {
@@ -248,53 +376,67 @@
             let service = document.getElementById('accName').value.trim();
             let login = document.getElementById('accLogin').value.trim();
             let pass = document.getElementById('accPass').value.trim();
-            if (!service || !login || !pass) return;
+            
+            if (!service || !login || !pass) {
+                document.getElementById('status').innerText = translations[currentLang].fillAllFields;
+                return;
+            }
             
             vaultData.push({ service, login, pass });
-            localStorage.setItem('vault_data', JSON.stringify(vaultData));
+            saveToStorage();
             
             document.getElementById('accName').value = '';
             document.getElementById('accLogin').value = '';
             document.getElementById('accPass').value = '';
-            openAddForm();
+            document.getElementById('status').innerText = "";
+            openAddForm(); // Скрыть форму
             renderList();
         }
 
+        function saveToStorage() {
+            // Простое Base64 кодирование, чтобы данные не лежали в открытом виде
+            const encoded = btoa(JSON.stringify(vaultData));
+            localStorage.setItem('vault_data', encoded);
+        }
+
         function renderList() {
-            let search = document.getElementById('searchInput').value.toLowerCase();
-            let html = "";
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const vaultEl = document.getElementById('vault');
             
             if (vaultData.length === 0) {
-                html = `<p style='text-align:center;'>${translations[currentLang].emptyVault}</p>`;
-            } else {
-                for (let i = 0; i < vaultData.length; i++) {
-                    let item = vaultData[i];
-                    if (item.service.toLowerCase().includes(search) || item.login.toLowerCase().includes(search)) {
-                        let count = 0;
-                        for (let j = 0; j < vaultData.length; j++) {
-                            if (vaultData[j].service.toLowerCase() === item.service.toLowerCase()) count++;
-                        }
-                        let ext = count > 1 ? `<span style="color: #888; font-size: 12px;">+${count - 1}</span>` : "";
-                        
-                        let passDisplay = revealedPasswords.has(i) 
-                            ? `<div class="pass-display">🔑 ${item.pass}</div>` 
-                            : '';
-                        
-                        html += `<div class="service-item">
-                                    <div class="info">
-                                        <b>${item.service} ${ext}</b>
-                                        <small>👤 ${item.login}</small>
-                                        ${passDisplay}
-                                    </div>
-                                    <div class="btn-group">
-                                        <button onclick="togglePass(${i})" style="background:#007bff;">${revealedPasswords.has(i) ? '🙈' : '👁'}</button>
-                                        <button onclick="deleteService(${i})" style="background:#dc3545;">✖</button>
-                                    </div>
-                                </div>`;
-                    }
+                vaultEl.innerHTML = `<p style='text-align:center; color: #888; margin: 20px 0;'>${translations[currentLang].emptyVault}</p>`;
+                return;
+            }
+
+            let html = "";
+            for (let i = 0; i < vaultData.length; i++) {
+                const item = vaultData[i];
+                // Поиск по названию или логину
+                if (item.service.toLowerCase().includes(search) || item.login.toLowerCase().includes(search)) {
+                    
+                    const passDisplay = revealedPasswords.has(i) 
+                        ? `<div class="pass-display">🔑 ${item.pass}</div>` 
+                        : '';
+                    
+                    html += `
+                        <div class="service-item">
+                            <div class="info">
+                                <b>${item.service}</b>
+                                <small>👤 ${item.login}</small>
+                                ${passDisplay}
+                            </div>
+                            <div class="btn-group">
+                                <button onclick="togglePass(${i})" title="Показать/Скрыть пароль">${revealedPasswords.has(i) ? '🙈' : '👁'}</button>
+                                <button onclick="deleteService(${i})" style="color: var(--danger); border-color: var(--danger);" title="Удалить">✖</button>
+                            </div>
+                        </div>`;
                 }
             }
-            document.getElementById('vault').innerHTML = html;
+            
+            if (html === "") {
+                html = `<p style='text-align:center; color: #888; margin: 20px 0;'>Ничего не найдено</p>`;
+            }
+            vaultEl.innerHTML = html;
         }
 
         function togglePass(index) {
@@ -307,39 +449,41 @@
         }
 
         function deleteService(index) {
-            vaultData.splice(index, 1);
-            localStorage.setItem('vault_data', JSON.stringify(vaultData));
-            revealedPasswords.clear();
-            renderList();
-        
+            if (confirm("Удалить этот сервис?")) {
+                vaultData.splice(index, 1);
+                saveToStorage();
+                revealedPasswords.clear();
+                renderList();
+            }
+        }
 
         function saveToFile() {
             if (vaultData.length === 0) {
                 document.getElementById('status').innerText = translations[currentLang].noData;
                 return;
             }
-            // Красивый текстовый формат
-            let textOutput = "";
-            for (let i = 0; i < vaultData.length; i++) {
-                textOutput += `Сервис: ${vaultData[i].service}\n`;
-                textOutput += `Логин: ${vaultData[i].login}\n`;
-                textOutput += `Пароль: ${vaultData[i].pass}\n\n\n`;
-            }
             
-            let blob = new Blob([textOutput], { type: 'text/plain' });
-            let url = URL.createObjectURL(blob);
-            let a = document.createElement('a');
+            let textOutput = "--- ONIX VAULT BACKUP ---\n\n";
+            vaultData.forEach(item => {
+                textOutput += `Сервис: ${item.service}\nЛогин: ${item.login}\nПароль: ${item.pass}\n\n`;
+            });
+            
+            const blob = new Blob([textOutput], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
             a.href = url;
-            a.download = "vault_backup.txt";
+            a.download = `onix_backup_${new Date().toISOString().slice(0,10)}.txt`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
+            
             document.getElementById('status').innerText = translations[currentLang].fileDownloaded;
         }
 
+        // --- ИНИЦИАЛИЗАЦИЯ ---
         setLang(currentLang);
         applyTheme(localStorage.getItem('vault_theme') || 'system');
     </script>
 </body>
-</html>э
+    </html>
