@@ -12,64 +12,73 @@
         body.light {
             --bg: #f4f4f4; --card-bg: #fff; --text: #111; --input-bg: #eee; --input-text: #000; --border: #ccc;
         }
+        * { box-sizing: border-box; }
         body { 
             font-family: sans-serif; background: var(--bg); color: var(--text); 
-            text-align: center; padding: 20px; transition: background 0.3s, color 0.3s; 
+            margin: 0; padding: 20px; transition: background 0.3s, color 0.3s; 
+            display: flex; justify-content: center; align-items: flex-start; min-height: 100vh;
         }
         .container { 
-            max-width: 450px; margin: 0 auto; background: var(--card-bg); 
-            padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            width: 100%; max-width: 480px; background: var(--card-bg); 
+            padding: 25px; border-radius: 16px; box-shadow: 0 8px 30px rgba(0,0,0,0.4);
         }
+        @media (min-width: 768px) {
+            .container { max-width: 550px; padding: 35px; }
+            body { padding: 40px 20px; }
+        }
+        
+        h2 { margin: 10px 0 20px 0; font-size: 24px; }
         input, select, button { 
-            margin: 8px 0; padding: 12px; border: none; border-radius: 8px; 
+            margin: 8px 0; padding: 14px; border: none; border-radius: 10px; 
             width: 100%; box-sizing: border-box; font-size: 16px; 
+            transition: all 0.2s ease;
         }
         input { background: var(--input-bg); color: var(--input-text); }
         button { background: var(--accent); color: white; cursor: pointer; font-weight: bold; }
-        button:active { opacity: 0.8; }
+        button:active { transform: scale(0.98); opacity: 0.9; }
         .success-btn { background: var(--success); }
         .danger-btn { background: var(--danger); }
-        .hidden { display: none; }
+        .hidden { display: none !important; }
+        
         .service-item { 
             display: flex; justify-content: space-between; align-items: center;
-            background: rgba(128,128,128,0.1); padding: 10px; margin: 8px 0; 
-            border-radius: 8px; text-align: left; gap: 10px;
-        }
-        .service-item .btn-group { display: flex; gap: 5px; }
-        .service-item button { width: auto; padding: 5px 10px; margin: 0; }
-        .theme-switcher, .lang-switcher { display: flex; justify-content: center; gap: 5px; margin-bottom: 10px; }
-        .theme-switcher button, .lang-switcher button { width: auto; padding: 5px 10px; font-size: 12px; }
-        .lock-icon { font-size: 50px; margin-bottom: 10px; }
-        #status { margin-top: 15px; font-size: 14px; color: #888; min-height: 20px; }
-
-        /* Модальное окно для подтверждения */
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.6); display: flex; justify-content: center; 
-            align-items: center; z-index: 1000;
-        }
-        .modal-box {
-            background: var(--card-bg); padding: 20px; border-radius: 12px; 
-            max-width: 300px; width: 90%; text-align: center;
+            background: rgba(128,128,128,0.1); padding: 12px; margin: 10px 0; 
+            border-radius: 10px; text-align: left; gap: 10px;
             border: 1px solid var(--border);
         }
-        .modal-box h3 { margin-top: 0; }
-        .modal-box .modal-buttons { display: flex; gap: 10px; margin-top: 15px; }
-        .modal-box button { margin: 0; }
-        .modal-box .btn-cancel { background: #555; }
+        .service-item .btn-group { display: flex; gap: 5px; flex-shrink: 0; }
+        .service-item button { width: auto; padding: 8px 12px; margin: 0; font-size: 14px; }
+        
+        .theme-switcher, .lang-switcher { display: flex; justify-content: center; gap: 5px; margin-bottom: 10px; flex-wrap: wrap; }
+        .theme-switcher button, .lang-switcher button { width: auto; padding: 6px 12px; font-size: 13px; border-radius: 20px; }
+        
+        .lock-icon { font-size: 50px; margin-bottom: 5px; }
+        #status { margin-top: 15px; font-size: 14px; color: #888; min-height: 20px; }
+        
+        /* Встроенная панель подтверждения (вместо модального окна) */
+        .inline-confirm {
+            background: rgba(220, 53, 69, 0.15);
+            border: 1px solid var(--danger);
+            border-radius: 10px;
+            padding: 12px;
+            margin: 10px 0;
+            text-align: center;
+        }
+        .inline-confirm p { margin: 0 0 10px 0; font-size: 14px; }
+        .inline-confirm .btn-group { display: flex; gap: 8px; }
+        .inline-confirm button { margin: 0; padding: 10px; font-size: 14px; }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- ПЕРЕКЛЮЧАТЕЛИ -->
         <div class="theme-switcher">
             <button onclick="setTheme('light')">☀️ Светлая</button>
             <button onclick="setTheme('dark')">🌙 Тёмная</button>
             <button onclick="setTheme('system')">💻 Системная</button>
         </div>
         <div class="lang-switcher">
-            <button onclick="setLang('ru')" id="langRu">🇷🇺 RU</button>
-            <button onclick="setLang('en')" id="langEn">🇬🇧 EN</button>
+            <button onclick="setLang('ru')">🇷🇺 RU</button>
+            <button onclick="setLang('en')">🇬🇧 EN</button>
         </div>
 
         <!-- ЭКРАН ВХОДА -->
@@ -78,7 +87,7 @@
             <h2 data-lang="title">Private Vault</h2>
             <input type="password" id="pinInput" data-lang="pinPlaceholder" placeholder="Введи пароль" onkeydown="if(event.key==='Enter') tryLogin()">
             <button onclick="tryLogin()" data-lang="loginBtn">Войти</button>
-            <button onclick="resetVault()" class="danger-btn" style="font-size:12px; background:transparent; color:#ff6b6b;" data-lang="resetBtn">Впервые? Сбросить всё</button>
+            <button onclick="resetVault()" class="danger-btn" style="font-size:12px; background:transparent; color:#ff6b6b; border:1px solid #ff6b6b;" data-lang="resetBtn">Впервые? Сбросить всё</button>
             <div id="status"></div>
         </div>
 
@@ -101,26 +110,11 @@
         </div>
     </div>
 
-    <!-- МОДАЛЬНОЕ ОКНО ПОДТВЕРЖДЕНИЯ -->
-    <div id="confirmModal" class="modal-overlay hidden">
-        <div class="modal-box">
-            <h3 id="modalTitle">Подтвердите действие</h3>
-            <p id="modalText">Вы уверены?</p>
-            <div class="modal-buttons">
-                <button onclick="closeModal()" class="btn-cancel" data-lang="cancelBtn">Отмена</button>
-                <button onclick="confirmAction()" class="danger-btn" data-lang="okBtn">OK</button>
-            </div>
-        </div>
-    </div>
-
     <script>
-        // --- ДАННЫЕ ---
         let masterPin = localStorage.getItem('vault_pin') || "";
         let vaultData = JSON.parse(localStorage.getItem('vault_data') || "[]");
         let currentLang = localStorage.getItem('vault_lang') || 'ru';
-        let pendingAction = null; // Для модального окна
 
-        // --- ПЕРЕВОДЫ ---
         const translations = {
             ru: {
                 title: "Private Vault", pinPlaceholder: "Введи пароль", loginBtn: "Войти",
@@ -128,12 +122,11 @@
                 searchPlaceholder: "🔍 Поиск по сервису...", addBtn: "+ Добавить сервис",
                 downloadBtn: "💾 Скачать файл", logoutBtn: "Выйти",
                 accNamePlaceholder: "Название сайта", accLoginPlaceholder: "Логин или Номер",
-                accPassPlaceholder: "Пароль", addServiceBtn: "Добавить", cancelBtn: "Отмена",
-                okBtn: "OK", confirmTitle: "Подтвердите действие",
-                confirmDelete: "Удалить этот сервис?", confirmReset: "Сбросить все данные?",
-                resetDone: "Сброшено. Введи новый пароль для создания сейфа.",
-                wrongPin: "❌ Неверный PIN!", pinSet: "✅ Ключ установлен! Войди снова для проверки.",
-                fileDownloaded: "✅ Файл скачан!", noData: "❌ Нет данных для скачивания.",
+                accPassPlaceholder: "Пароль", addServiceBtn: "Добавить",
+                confirmDelete: "Удалить этот сервис?", yes: "Да", no: "Нет",
+                resetConfirm: "Сбросить все данные? Напиши 'ДА' в поле пароля.",
+                wrongPin: "❌ Неверный PIN!", pinSet: "✅ Ключ установлен! Войди снова.",
+                fileDownloaded: "✅ Файл скачан!", noData: "❌ Нет данных.",
                 emptyVault: "Пока пусто. Добавь первый сервис!"
             },
             en: {
@@ -142,12 +135,11 @@
                 searchPlaceholder: "🔍 Search service...", addBtn: "+ Add service",
                 downloadBtn: "💾 Download file", logoutBtn: "Logout",
                 accNamePlaceholder: "Service name", accLoginPlaceholder: "Login or Number",
-                accPassPlaceholder: "Password", addServiceBtn: "Add", cancelBtn: "Cancel",
-                okBtn: "OK", confirmTitle: "Confirm action",
-                confirmDelete: "Delete this service?", confirmReset: "Reset all data?",
-                resetDone: "Reset done. Enter new password to create vault.",
-                wrongPin: "❌ Wrong PIN!", pinSet: "✅ Key set! Login again to verify.",
-                fileDownloaded: "✅ File downloaded!", noData: "❌ No data to download.",
+                accPassPlaceholder: "Password", addServiceBtn: "Add",
+                confirmDelete: "Delete this service?", yes: "Yes", no: "No",
+                resetConfirm: "Reset all data? Type 'YES' in password field.",
+                wrongPin: "❌ Wrong PIN!", pinSet: "✅ Key set! Login again.",
+                fileDownloaded: "✅ File downloaded!", noData: "❌ No data.",
                 emptyVault: "Empty. Add your first service!"
             }
         };
@@ -165,7 +157,6 @@
             });
         }
 
-        // --- ТЕМЫ ---
         function setTheme(theme) {
             localStorage.setItem('vault_theme', theme);
             applyTheme(theme);
@@ -181,12 +172,10 @@
                 }
             }
         }
-        // Автообновление при смене системной темы
         window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', () => {
             if (localStorage.getItem('vault_theme') === 'system') applyTheme('system');
         });
 
-        // --- ЛОГИН ---
         function tryLogin() {
             const pin = document.getElementById('pinInput').value.trim();
             if (pin.length < 1) return;
@@ -207,14 +196,18 @@
         }
 
         function resetVault() {
-            showModal(translations[currentLang].confirmReset, () => {
+            // Вместо модального окна - просто просим ввести подтверждение
+            let confirmText = prompt(translations[currentLang].resetConfirm);
+            if (confirmText && (confirmText.toUpperCase() === 'ДА' || confirmText.toUpperCase() === 'YES')) {
                 localStorage.removeItem('vault_pin');
                 localStorage.removeItem('vault_data');
                 masterPin = "";
                 vaultData = [];
                 document.getElementById('pinInput').value = '';
-                document.getElementById('status').innerText = translations[currentLang].resetDone;
-            });
+                document.getElementById('status').innerText = "✅ Сброшено. Введи новый пароль.";
+            } else {
+                document.getElementById('status').innerText = "❌ Отменено.";
+            }
         }
 
         function logout() {
@@ -230,7 +223,6 @@
             renderList();
         }
 
-        // --- СПИСОК ---
         document.getElementById('searchInput').addEventListener('input', renderList);
 
         function openAddForm() {
@@ -269,11 +261,19 @@
                         }
                         let ext = count > 1 ? `<span style="color: #888; font-size: 12px;">+${count - 1}</span>` : "";
                         
+                        // Встроенная панель подтверждения удаления (вместо модального окна)
                         html += `<div class="service-item">
                                     <span><b>${item.service}</b> <small>${item.login}</small> ${ext}</span>
                                     <div class="btn-group">
                                         <button onclick="revealPass(${i})" style="background:#007bff;">👁</button>
-                                        <button onclick="deleteService(${i})" style="background:#dc3545;">✖</button>
+                                        <button onclick="toggleDeleteConfirm(${i})" style="background:#dc3545;">✖</button>
+                                    </div>
+                                </div>
+                                <div id="confirm-del-${i}" class="inline-confirm hidden">
+                                    <p>${translations[currentLang].confirmDelete}</p>
+                                    <div class="btn-group">
+                                        <button onclick="deleteService(${i})" class="danger-btn">${translations[currentLang].yes}</button>
+                                        <button onclick="toggleDeleteConfirm(${i})" style="background:#555;">${translations[currentLang].no}</button>
                                     </div>
                                 </div>`;
                     }
@@ -282,43 +282,26 @@
             document.getElementById('vault').innerHTML = html;
         }
 
+        function toggleDeleteConfirm(index) {
+            const el = document.getElementById('confirm-del-' + index);
+            if (el) el.classList.toggle('hidden');
+        }
+
         function revealPass(index) {
             document.getElementById('status').innerText = "👤 " + vaultData[index].login + " | 🔑 " + vaultData[index].pass;
         }
 
         function deleteService(index) {
-            showModal(translations[currentLang].confirmDelete, () => {
-                vaultData.splice(index, 1);
-                localStorage.setItem('vault_data', JSON.stringify(vaultData));
-                renderList();
-            });
+            vaultData.splice(index, 1);
+            localStorage.setItem('vault_data', JSON.stringify(vaultData));
+            renderList();
         }
 
-        // --- МОДАЛЬНОЕ ОКНО ---
-        function showModal(text, action) {
-            document.getElementById('modalText').innerText = text;
-            document.getElementById('modalTitle').innerText = translations[currentLang].confirmTitle;
-            pendingAction = action;
-            document.getElementById('confirmModal').classList.remove('hidden');
-        }
-
-        function closeModal() {
-            document.getElementById('confirmModal').classList.add('hidden');
-            pendingAction = null;
-        }
-
-        function confirmAction() {
-            if (pendingAction) pendingAction();
-            closeModal();
-        }
-
-        // --- СКАЧИВАНИЕ (Красивое форматирование) ---
         function saveToFile() {
             if (vaultData.length === 0) {
                 document.getElementById('status').innerText = translations[currentLang].noData;
                 return;
             }
-            // Красивое форматирование JSON с отступами
             let dataStr = JSON.stringify(vaultData, null, 2);
             let blob = new Blob([dataStr], { type: 'application/json' });
             let url = URL.createObjectURL(blob);
@@ -332,9 +315,8 @@
             document.getElementById('status').innerText = translations[currentLang].fileDownloaded;
         }
 
-        // --- ИНИЦИАЛИЗАЦИЯ ---
         setLang(currentLang);
         applyTheme(localStorage.getItem('vault_theme') || 'system');
     </script>
 </body>
-    </html>
+</html>
