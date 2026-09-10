@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Private Vault</title>
+    <title>ONIX</title>
     <style>
         :root {
-            --bg: #111; --card-bg: #222; --text: #fff; --input-bg: #fff; --input-text: #000;
+            --bg: #111; --card-bg: #1a1a1a; --text: #fff; --input-bg: #fff; --input-text: #000;
             --accent: #007bff; --success: #28a745; --danger: #dc3545; --border: #444;
+            --onix-red: #e63946;
         }
         body.light {
             --bg: #f4f4f4; --card-bg: #fff; --text: #111; --input-bg: #eee; --input-text: #000; --border: #ccc;
@@ -27,7 +28,20 @@
             body { padding: 40px 20px; }
         }
         
-        h2 { margin: 10px 0 20px 0; font-size: 24px; }
+        h1.onix-title {
+            color: var(--onix-red);
+            font-size: 42px;
+            letter-spacing: 4px;
+            margin: 15px 0 5px 0;
+            text-shadow: 0 0 20px rgba(230, 57, 70, 0.3);
+        }
+        p.onix-subtitle {
+            color: var(--onix-red);
+            font-size: 14px;
+            margin: 0 0 25px 0;
+            opacity: 0.85;
+        }
+        
         input, select, button { 
             margin: 8px 0; padding: 14px; border: none; border-radius: 10px; 
             width: 100%; box-sizing: border-box; font-size: 16px; 
@@ -46,27 +60,21 @@
             border-radius: 10px; text-align: left; gap: 10px;
             border: 1px solid var(--border);
         }
+        .service-item .info { flex: 1; min-width: 0; }
+        .service-item .info b { display: block; margin-bottom: 3px; }
+        .service-item .info small { color: #888; word-break: break-all; }
+        .service-item .pass-display { 
+            font-family: monospace; color: var(--success); 
+            word-break: break-all; font-size: 13px; margin-top: 5px;
+            background: rgba(40, 167, 69, 0.1); padding: 3px 6px; border-radius: 4px;
+        }
         .service-item .btn-group { display: flex; gap: 5px; flex-shrink: 0; }
-        .service-item button { width: auto; padding: 8px 12px; margin: 0; font-size: 14px; }
+        .service-item button { width: auto; padding: 8px 10px; margin: 0; font-size: 14px; }
         
         .theme-switcher, .lang-switcher { display: flex; justify-content: center; gap: 5px; margin-bottom: 10px; flex-wrap: wrap; }
         .theme-switcher button, .lang-switcher button { width: auto; padding: 6px 12px; font-size: 13px; border-radius: 20px; }
         
-        .lock-icon { font-size: 50px; margin-bottom: 5px; }
         #status { margin-top: 15px; font-size: 14px; color: #888; min-height: 20px; }
-        
-        /* Встроенная панель подтверждения (вместо модального окна) */
-        .inline-confirm {
-            background: rgba(220, 53, 69, 0.15);
-            border: 1px solid var(--danger);
-            border-radius: 10px;
-            padding: 12px;
-            margin: 10px 0;
-            text-align: center;
-        }
-        .inline-confirm p { margin: 0 0 10px 0; font-size: 14px; }
-        .inline-confirm .btn-group { display: flex; gap: 8px; }
-        .inline-confirm button { margin: 0; padding: 10px; font-size: 14px; }
     </style>
 </head>
 <body>
@@ -83,9 +91,9 @@
 
         <!-- ЭКРАН ВХОДА -->
         <div id="loginScreen">
-            <div class="lock-icon">🔒</div>
-            <h2 data-lang="title">Private Vault</h2>
-            <input type="password" id="pinInput" data-lang="pinPlaceholder" placeholder="Введи пароль" onkeydown="if(event.key==='Enter') tryLogin()">
+            <h1 class="onix-title">ONIX</h1>
+            <p class="onix-subtitle" data-lang="subtitle">Твой безопасный сейф паролей</p>
+            <input type="password" id="pinInput" data-lang="pinPlaceholder" placeholder="Введи пароль" maxlength="30" onkeydown="if(event.key==='Enter') tryLogin()">
             <button onclick="tryLogin()" data-lang="loginBtn">Войти</button>
             <button onclick="resetVault()" class="danger-btn" style="font-size:12px; background:transparent; color:#ff6b6b; border:1px solid #ff6b6b;" data-lang="resetBtn">Впервые? Сбросить всё</button>
             <div id="status"></div>
@@ -93,8 +101,9 @@
 
         <!-- ГЛАВНЫЙ ЭКРАН -->
         <div id="vaultScreen" class="hidden">
-            <h2 data-lang="vaultTitle">🔐 Твой Сейф</h2>
-            <input type="text" id="searchInput" data-lang="searchPlaceholder" placeholder="🔍 Поиск по сервису...">
+            <h1 class="onix-title" style="font-size: 32px;">ONIX</h1>
+            <p class="onix-subtitle" data-lang="subtitle">Твой безопасный сейф паролей</p>
+            <input type="text" id="searchInput" data-lang="searchPlaceholder" placeholder="🔍 Поиск по сервису..." maxlength="30">
             <div id="vault"></div>
             <br>
             <button onclick="openAddForm()" data-lang="addBtn">+ Добавить сервис</button>
@@ -102,9 +111,9 @@
             <button onclick="logout()" style="background:#555;" data-lang="logoutBtn">Выйти</button>
             
             <div id="addForm" class="hidden">
-                <input type="text" id="accName" data-lang="accNamePlaceholder" placeholder="Название сайта">
-                <input type="text" id="accLogin" data-lang="accLoginPlaceholder" placeholder="Логин или Номер">
-                <input type="text" id="accPass" data-lang="accPassPlaceholder" placeholder="Пароль">
+                <input type="text" id="accName" data-lang="accNamePlaceholder" placeholder="Название сайта" maxlength="30">
+                <input type="text" id="accLogin" data-lang="accLoginPlaceholder" placeholder="Логин или Номер" maxlength="30">
+                <input type="text" id="accPass" data-lang="accPassPlaceholder" placeholder="Пароль" maxlength="30">
                 <button onclick="addService()" data-lang="addServiceBtn">Добавить</button>
             </div>
         </div>
@@ -114,33 +123,38 @@
         let masterPin = localStorage.getItem('vault_pin') || "";
         let vaultData = JSON.parse(localStorage.getItem('vault_data') || "[]");
         let currentLang = localStorage.getItem('vault_lang') || 'ru';
+        let revealedPasswords = new Set();
 
         const translations = {
             ru: {
-                title: "Private Vault", pinPlaceholder: "Введи пароль", loginBtn: "Войти",
-                resetBtn: "Впервые? Сбросить всё", vaultTitle: "🔐 Твой Сейф",
+                subtitle: "Твой безопасный сейф паролей",
+                pinPlaceholder: "Введи пароль", loginBtn: "Войти",
+                resetBtn: "Впервые? Сбросить всё",
                 searchPlaceholder: "🔍 Поиск по сервису...", addBtn: "+ Добавить сервис",
                 downloadBtn: "💾 Скачать файл", logoutBtn: "Выйти",
                 accNamePlaceholder: "Название сайта", accLoginPlaceholder: "Логин или Номер",
                 accPassPlaceholder: "Пароль", addServiceBtn: "Добавить",
-                confirmDelete: "Удалить этот сервис?", yes: "Да", no: "Нет",
-                resetConfirm: "Сбросить все данные? Напиши 'ДА' в поле пароля.",
                 wrongPin: "❌ Неверный PIN!", pinSet: "✅ Ключ установлен! Войди снова.",
                 fileDownloaded: "✅ Файл скачан!", noData: "❌ Нет данных.",
-                emptyVault: "Пока пусто. Добавь первый сервис!"
+                emptyVault: "Пока пусто. Добавь первый сервис!",
+                resetDone: "✅ Сброшено. Введи новый пароль.",
+                resetCancel: "❌ Отменено.",
+                resetConfirm: "Сбросить все данные? Напиши 'ДА' в поле пароля."
             },
             en: {
-                title: "Private Vault", pinPlaceholder: "Enter password", loginBtn: "Login",
-                resetBtn: "First time? Reset all", vaultTitle: "🔐 Your Vault",
+                subtitle: "Your safe password vault",
+                pinPlaceholder: "Enter password", loginBtn: "Login",
+                resetBtn: "First time? Reset all",
                 searchPlaceholder: "🔍 Search service...", addBtn: "+ Add service",
                 downloadBtn: "💾 Download file", logoutBtn: "Logout",
                 accNamePlaceholder: "Service name", accLoginPlaceholder: "Login or Number",
                 accPassPlaceholder: "Password", addServiceBtn: "Add",
-                confirmDelete: "Delete this service?", yes: "Yes", no: "No",
-                resetConfirm: "Reset all data? Type 'YES' in password field.",
                 wrongPin: "❌ Wrong PIN!", pinSet: "✅ Key set! Login again.",
                 fileDownloaded: "✅ File downloaded!", noData: "❌ No data.",
-                emptyVault: "Empty. Add your first service!"
+                emptyVault: "Empty. Add your first service!",
+                resetDone: "✅ Reset done. Enter new password.",
+                resetCancel: "❌ Cancelled.",
+                resetConfirm: "Reset all data? Type 'YES' in password field."
             }
         };
 
@@ -196,17 +210,17 @@
         }
 
         function resetVault() {
-            // Вместо модального окна - просто просим ввести подтверждение
             let confirmText = prompt(translations[currentLang].resetConfirm);
             if (confirmText && (confirmText.toUpperCase() === 'ДА' || confirmText.toUpperCase() === 'YES')) {
                 localStorage.removeItem('vault_pin');
                 localStorage.removeItem('vault_data');
                 masterPin = "";
                 vaultData = [];
+                revealedPasswords.clear();
                 document.getElementById('pinInput').value = '';
-                document.getElementById('status').innerText = "✅ Сброшено. Введи новый пароль.";
+                document.getElementById('status').innerText = translations[currentLang].resetDone;
             } else {
-                document.getElementById('status').innerText = "❌ Отменено.";
+                document.getElementById('status').innerText = translations[currentLang].resetCancel;
             }
         }
 
@@ -215,6 +229,7 @@
             document.getElementById('loginScreen').classList.remove('hidden');
             document.getElementById('pinInput').value = '';
             document.getElementById('status').innerText = "";
+            revealedPasswords.clear();
         }
 
         function showVault() {
@@ -261,19 +276,19 @@
                         }
                         let ext = count > 1 ? `<span style="color: #888; font-size: 12px;">+${count - 1}</span>` : "";
                         
-                        // Встроенная панель подтверждения удаления (вместо модального окна)
+                        let passDisplay = revealedPasswords.has(i) 
+                            ? `<div class="pass-display">🔑 ${item.pass}</div>` 
+                            : '';
+                        
                         html += `<div class="service-item">
-                                    <span><b>${item.service}</b> <small>${item.login}</small> ${ext}</span>
-                                    <div class="btn-group">
-                                        <button onclick="revealPass(${i})" style="background:#007bff;">👁</button>
-                                        <button onclick="toggleDeleteConfirm(${i})" style="background:#dc3545;">✖</button>
+                                    <div class="info">
+                                        <b>${item.service} ${ext}</b>
+                                        <small>👤 ${item.login}</small>
+                                        ${passDisplay}
                                     </div>
-                                </div>
-                                <div id="confirm-del-${i}" class="inline-confirm hidden">
-                                    <p>${translations[currentLang].confirmDelete}</p>
                                     <div class="btn-group">
-                                        <button onclick="deleteService(${i})" class="danger-btn">${translations[currentLang].yes}</button>
-                                        <button onclick="toggleDeleteConfirm(${i})" style="background:#555;">${translations[currentLang].no}</button>
+                                        <button onclick="togglePass(${i})" style="background:#007bff;">${revealedPasswords.has(i) ? '🙈' : '👁'}</button>
+                                        <button onclick="deleteService(${i})" style="background:#dc3545;">✖</button>
                                     </div>
                                 </div>`;
                     }
@@ -282,32 +297,40 @@
             document.getElementById('vault').innerHTML = html;
         }
 
-        function toggleDeleteConfirm(index) {
-            const el = document.getElementById('confirm-del-' + index);
-            if (el) el.classList.toggle('hidden');
-        }
-
-        function revealPass(index) {
-            document.getElementById('status').innerText = "👤 " + vaultData[index].login + " | 🔑 " + vaultData[index].pass;
+        function togglePass(index) {
+            if (revealedPasswords.has(index)) {
+                revealedPasswords.delete(index);
+            } else {
+                revealedPasswords.add(index);
+            }
+            renderList();
         }
 
         function deleteService(index) {
             vaultData.splice(index, 1);
             localStorage.setItem('vault_data', JSON.stringify(vaultData));
+            revealedPasswords.clear();
             renderList();
-        }
+        
 
         function saveToFile() {
             if (vaultData.length === 0) {
                 document.getElementById('status').innerText = translations[currentLang].noData;
                 return;
             }
-            let dataStr = JSON.stringify(vaultData, null, 2);
-            let blob = new Blob([dataStr], { type: 'application/json' });
+            // Красивый текстовый формат
+            let textOutput = "";
+            for (let i = 0; i < vaultData.length; i++) {
+                textOutput += `Сервис: ${vaultData[i].service}\n`;
+                textOutput += `Логин: ${vaultData[i].login}\n`;
+                textOutput += `Пароль: ${vaultData[i].pass}\n\n\n`;
+            }
+            
+            let blob = new Blob([textOutput], { type: 'text/plain' });
             let url = URL.createObjectURL(blob);
             let a = document.createElement('a');
             a.href = url;
-            a.download = "vault_backup.json";
+            a.download = "vault_backup.txt";
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
@@ -319,4 +342,4 @@
         applyTheme(localStorage.getItem('vault_theme') || 'system');
     </script>
 </body>
-</html>
+</html>э
