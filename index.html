@@ -1,134 +1,201 @@
-<!DOCTYPE html>                                                       <html lang="ru">                                                      <head>
+<!DOCTYPE html>
+<html lang="ru">
+<head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">                                                                      <title>Private Vault</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Private Vault</title>
     <style>
-        body { font-family: sans-serif; background: #111; color: #fff; text-align: center; padding: 20px; }                                         .container { max-width: 400px; margin: 0 auto; background: #222; padding: 20px; border-radius: 10px; }                                      input, select, button { margin: 10px 0; padding: 10px; border: none; border-radius: 5px; width: 100%; box-sizing: border-box; }             button { background: #007bff; color: white; cursor: pointer; }
-        button:disabled { background: #555; }                                 .service-item { display: flex; justify-content: space-between; background: #333; padding: 10px; margin: 5px 0; border-radius: 5px; }        .hidden { display: none; }
-        #vault { text-align: left; }                                          .search-icon { font-size: 24px; cursor: pointer; }
-        .lock-icon { font-size: 50px; margin-bottom: 20px; }
-        #status { margin-top: 20px; font-size: 14px; color: #aaa; }
-    </style>                                                          </head>
+        :root {
+            --bg: #111;
+            --card-bg: #222;
+            --text: #fff;
+            --input-bg: #fff;
+            --input-text: #000;
+            --accent: #007bff;
+            --success: #28a745;
+            --danger: #dc3545;
+        }
+        
+        body.light {
+            --bg: #f4f4f4;
+            --card-bg: #fff;
+            --text: #111;
+            --input-bg: #eee;
+            --input-text: #000;
+        }
+
+        body { 
+            font-family: sans-serif; 
+            background: var(--bg); 
+            color: var(--text); 
+            text-align: center; 
+            padding: 20px; 
+            transition: background 0.3s, color 0.3s;
+        }
+        .container { 
+            max-width: 400px; 
+            margin: 0 auto; 
+            background: var(--card-bg); 
+            padding: 20px; 
+            border-radius: 10px; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+        input, select, button { 
+            margin: 10px 0; 
+            padding: 12px; 
+            border: none; 
+            border-radius: 8px; 
+            width: 100%; 
+            box-sizing: border-box; 
+            font-size: 16px;
+        }
+        input { background: var(--input-bg); color: var(--input-text); }
+        button { background: var(--accent); color: white; cursor: pointer; font-weight: bold; }
+        button:active { opacity: 0.8; }
+        .success-btn { background: var(--success); }
+        .danger-btn { background: var(--danger); }
+        .hidden { display: none; }
+        .service-item { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            background: rgba(255,255,255,0.1); 
+            padding: 10px; 
+            margin: 5px 0; 
+            border-radius: 8px; 
+            text-align: left;
+        }
+        .service-item button { width: auto; padding: 5px 10px; margin: 0; }
+        .theme-switcher { display: flex; justify-content: center; gap: 5px; margin-bottom: 10px; }
+        .theme-switcher button { width: auto; padding: 5px 10px; font-size: 12px; }
+        .lock-icon { font-size: 50px; margin-bottom: 10px; }
+        #status { margin-top: 15px; font-size: 14px; color: #888; min-height: 20px; }
+    </style>
+</head>
 <body>
-    <div class="container">                                                   <!-- ЭКРАН ВХОДА -->
+    <div class="container">
+        <!-- ПЕРЕКЛЮЧАТЕЛЬ ТЕМ -->
+        <div class="theme-switcher">
+            <button onclick="setTheme('light')">☀️ Светлая</button>
+            <button onclick="setTheme('dark')">🌙 Тёмная</button>
+            <button onclick="setTheme('system')">💻 Системная</button>
+        </div>
+
+        <!-- ЭКРАН ВХОДА -->
         <div id="loginScreen">
             <div class="lock-icon">🔒</div>
             <h2>Private Vault</h2>
-            <input type="password" id="pinInput" placeholder="Введи пароль (XXXX-1234)" oninput="formatPin(this)">
+            <input type="password" id="pinInput" placeholder="Введи пароль" onkeydown="if(event.key==='Enter') tryLogin()">
             <button onclick="tryLogin()">Войти</button>
-            <div id="firstTimeMsg" class="hidden" style="color: #0f0; margin-top:10px;">Новый пользователь! Твой мастер-пароль: <b id="generatedPin"></b></div>
+            <button onclick="resetVault()" class="danger-btn" style="font-size:12px; background:transparent; color:#ff6b6b;">Впервые? Сбросить всё</button>
+            <div id="status"></div>
         </div>
 
-        <!-- ГЛАВНЫЙ ЭКРАН (СЕЙФ) -->
+        <!-- ГЛАВНЫЙ ЭКРАН -->
         <div id="vaultScreen" class="hidden">
             <h2>🔐 Твой Сейф</h2>
             <input type="text" id="searchInput" placeholder="🔍 Поиск по сервису...">
             <div id="vault"></div>
             <br>
             <button onclick="openAddForm()">+ Добавить сервис</button>
-            <button onclick="saveToFile()" style="background: #28a745;">💾 Скачать файл</button>
-
-            <!-- ФОРМА ДОБАВЛЕНИЯ -->
+            <button onclick="saveToFile()" class="success-btn">💾 Скачать файл</button>
+            <button onclick="logout()" style="background:#555;">Выйти</button>
+            
             <div id="addForm" class="hidden">
                 <input type="text" id="accName" placeholder="Название сайта / Сервиса">
                 <input type="text" id="accLogin" placeholder="Логин или Номер">
-                <input type="password" id="accPass" placeholder="Пароль">
+                <input type="text" id="accPass" placeholder="Пароль">
                 <button onclick="addService()">Добавить</button>
             </div>
         </div>
     </div>
-    <div id="status"></div>
 
     <script>
-        // ДАННЫЕ
-        let masterPin = "";
-        let vaultData = [];
+        // --- ДАННЫЕ ---
+        let masterPin = localStorage.getItem('vault_pin') || "";
+        let vaultData = JSON.parse(localStorage.getItem('vault_data') || "[]");
         let isLoggedIn = false;
 
-        // Утилиты для формата пароля (авто-дефис)
-        function formatPin(input) {
-            let val = input.value.replace(/\D/g, ''); // Убираем всё, кроме цифр
-            if (val.length > 4) val = val.slice(0, 4);
-            if (val.length > 4) {
-                input.value = val.slice(0, 4) + '-' + val.slice(4);
-            } else {
-                input.value = val;
+        // --- ТЕМЫ ---
+        function setTheme(theme) {
+            if (theme === 'light') document.body.classList.add('light');
+            else if (theme === 'dark') document.body.classList.remove('light');
+            else if (theme === 'system') {
+                if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+                    document.body.classList.add('light');
+                } else {
+                    document.body.classList.remove('light');
+                }
             }
+            localStorage.setItem('vault_theme', theme);
         }
+        // Применяем сохраненную тему при загрузке
+        const savedTheme = localStorage.getItem('vault_theme') || 'system';
+        setTheme(savedTheme);
 
-        // Функция простого шифрования (XOR + Base64) для надёжности без сервера
-        function encrypt(text, key) {
-            let result = '';
-            for (let i = 0; i < text.length; i++) {
-                result += String.fromCharCode(text.charCodeAt(i) ^ key.charCodeAt(i % key.length));
-            }
-            return btoa(result);
-        }
-
-        function decrypt(encryptedText, key) {
-            let decoded = atob(encryptedText);
-            let result = '';
-            for (let i = 0; i < decoded.length; i++) {
-                result += String.fromCharCode(decoded.charCodeAt(i) ^ key.charCodeAt(i % key.length));
-            }
-            return result;
-        }
-
-        // ЛОГИН
+        // --- ЛОГИН ---
         function tryLogin() {
             const pin = document.getElementById('pinInput').value.trim();
-            if (pin.length < 4) return;
-
-            // Первый вход (генерация пароля)
+            if (pin.length < 1) return;
+            
             if (masterPin === "") {
                 masterPin = pin;
-                document.getElementById('generatedPin').innerText = masterPin;
-                document.getElementById('firstTimeMsg').classList.remove('hidden');
-                document.getElementById('status').innerText = "Ключ установлен!";
-                // Сразу показываем сейф
+                localStorage.setItem('vault_pin', masterPin);
+                document.getElementById('status').innerText = "✅ Ключ установлен!";
                 isLoggedIn = true;
                 showVault();
                 return;
             }
-
-            // Сравниваем и проверяем
+            
             if (pin === masterPin) {
                 isLoggedIn = true;
-                document.getElementById('firstTimeMsg').classList.add('hidden');
                 showVault();
             } else {
                 document.getElementById('status').innerText = "❌ Неверный PIN!";
             }
         }
 
+        function resetVault() {
+            if(confirm("Ты уверен? Все сохраненные пароли удалятся!")) {
+                localStorage.removeItem('vault_pin');
+                localStorage.removeItem('vault_data');
+                masterPin = "";
+                vaultData = [];
+                document.getElementById('pinInput').value = '';
+                document.getElementById('status').innerText = "Сброшено. Введи новый пароль для создания сейфа.";
+            }
+        }
+
+        function logout() {
+            isLoggedIn = false;
+            document.getElementById('vaultScreen').classList.add('hidden');
+            document.getElementById('loginScreen').classList.remove('hidden');
+            document.getElementById('pinInput').value = '';
+            document.getElementById('status').innerText = "";
+        }
+
         function showVault() {
             document.getElementById('loginScreen').classList.add('hidden');
             document.getElementById('vaultScreen').classList.remove('hidden');
-
-            // Автоматическая генерация пароля при первом входе
-            if (vaultData.length === 0) {
-                let autoKey = "XXXX-" + Math.floor(1000 + Math.random() * 9000);
-                vaultData.push({ service: "Private Vault", login: "Мой пароль", pass: autoKey, added: true });
-                document.getElementById('status').innerText = "Авто-пароль сгенерирован: " + autoKey;
-            }
-
             renderList();
         }
 
-        // ПОИСК
+        // --- СПИСОК ---
         document.getElementById('searchInput').addEventListener('input', renderList);
 
-        // ДОБАВЛЕНИЕ СЕРВИСА
         function openAddForm() {
             document.getElementById('addForm').classList.toggle('hidden');
         }
 
         function addService() {
-            let service = document.getElementById('accName').value;
-            let login = document.getElementById('accLogin').value;
-            let pass = document.getElementById('accPass').value;
+            let service = document.getElementById('accName').value.trim();
+            let login = document.getElementById('accLogin').value.trim();
+            let pass = document.getElementById('accPass').value.trim();
             if (!service || !login || !pass) return;
-
+            
             vaultData.push({ service, login, pass });
+            localStorage.setItem('vault_data', JSON.stringify(vaultData)); // СОХРАНЕНИЕ
+            
             document.getElementById('accName').value = '';
             document.getElementById('accLogin').value = '';
             document.getElementById('accPass').value = '';
@@ -136,46 +203,66 @@
             renderList();
         }
 
-        // РЕНДЕР СПИСКА (с +2 значками)
         function renderList() {
             let search = document.getElementById('searchInput').value.toLowerCase();
             let html = "";
-
-            for (let i = 0; i < vaultData.length; i++) {
-                let item = vaultData[i];
-                if (item.service.toLowerCase().includes(search) || item.login.toLowerCase().includes(search)) {
-                    // Группировка +2
-                    let count = 0;
-                    for (let j = 0; j < vaultData.length; j++) {
-                        if (vaultData[j].service === item.service) count++;
+            
+            if (vaultData.length === 0) {
+                html = "<p style='text-align:center;'>Пока пусто. Добавь первый сервис!</p>";
+            } else {
+                for (let i = 0; i < vaultData.length; i++) {
+                    let item = vaultData[i];
+                    if (item.service.toLowerCase().includes(search) || item.login.toLowerCase().includes(search)) {
+                        // Группировка +2
+                        let count = 0;
+                        for (let j = 0; j < vaultData.length; j++) {
+                            if (vaultData[j].service.toLowerCase() === item.service.toLowerCase()) count++;
+                        }
+                        let ext = count > 1 ? `<span style="color: #888; font-size: 12px;">+${count - 1}</span>` : "";
+                        
+                        html += `<div class="service-item">
+                                    <span><b>${item.service}</b> <small>${item.login}</small> ${ext}</span>
+                                    <div>
+                                        <button onclick="revealPass(${i})">👁</button>
+                                        <button onclick="deleteService(${i})" style="background:#dc3545;">✖</button>
+                                    </div>
+                                </div>`;
                     }
-                    let ext = count > 1 ? `<span style="color: #aaa; font-size: 12px;">+${count - 1}</span>` : "";
-
-                    html += `<div class="service-item">
-                                <span>${item.service} ${ext}</span>
-                                <button onclick="revealPass(${i})" style="width:auto;">👁</button>
-                            </div>`;
                 }
             }
-            document.getElementById('vault').innerHTML = html || "<p>Нет данных</p>";
+            document.getElementById('vault').innerHTML = html;
         }
 
         function revealPass(index) {
-            document.getElementById('status').innerText = "Логин: " + vaultData[index].login + " | Пароль: " + vaultData[index].pass;
+            document.getElementById('status').innerText = "👤 " + vaultData[index].login + " | 🔑 " + vaultData[index].pass;
         }
 
-        // СОХРАНЕНИЕ В ФАЙЛ (Шифрование в TXT)
+        function deleteService(index) {
+            if(confirm("Удалить этот сервис?")) {
+                vaultData.splice(index, 1);
+                localStorage.setItem('vault_data', JSON.stringify(vaultData)); // СОХРАНЕНИЕ
+                renderList();
+            }
+        }
+
+        // --- СКАЧИВАНИЕ ---
         function saveToFile() {
-            let encryptedData = encrypt(JSON.stringify(vaultData), masterPin);
-            let blob = new Blob([encryptedData], { type: 'text/plain' });
+            if (vaultData.length === 0) {
+                document.getElementById('status').innerText = "❌ Нет данных для скачивания.";
+                return;
+            }
+            let dataStr = JSON.stringify(vaultData);
+            let blob = new Blob([dataStr], { type: 'application/json' });
             let url = URL.createObjectURL(blob);
             let a = document.createElement('a');
             a.href = url;
-            a.download = "vault.txt";
+            a.download = "vault_backup.json";
+            document.body.appendChild(a);
             a.click();
+            document.body.removeChild(a);
             URL.revokeObjectURL(url);
-            document.getElementById('status').innerText = "✅ Файл зашифрован и скачан!";
+            document.getElementById('status').innerText = "✅ Файл скачан!";
         }
     </script>
 </body>
-    </html>
+</html>
