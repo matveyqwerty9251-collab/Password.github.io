@@ -1,9 +1,181 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>MorningOnly</title>
-</head>
+<!DOCTYPE html>                                                       <html lang="ru">                                                      <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">                                                                      <title>Private Vault</title>
+    <style>
+        body { font-family: sans-serif; background: #111; color: #fff; text-align: center; padding: 20px; }                                         .container { max-width: 400px; margin: 0 auto; background: #222; padding: 20px; border-radius: 10px; }                                      input, select, button { margin: 10px 0; padding: 10px; border: none; border-radius: 5px; width: 100%; box-sizing: border-box; }             button { background: #007bff; color: white; cursor: pointer; }
+        button:disabled { background: #555; }                                 .service-item { display: flex; justify-content: space-between; background: #333; padding: 10px; margin: 5px 0; border-radius: 5px; }        .hidden { display: none; }
+        #vault { text-align: left; }                                          .search-icon { font-size: 24px; cursor: pointer; }
+        .lock-icon { font-size: 50px; margin-bottom: 20px; }
+        #status { margin-top: 20px; font-size: 14px; color: #aaa; }
+    </style>                                                          </head>
 <body>
-    <h1>Привет, это сайт!</h1>
+    <div class="container">                                                   <!-- ЭКРАН ВХОДА -->
+        <div id="loginScreen">
+            <div class="lock-icon">🔒</div>
+            <h2>Private Vault</h2>
+            <input type="password" id="pinInput" placeholder="Введи пароль (XXXX-1234)" oninput="formatPin(this)">
+            <button onclick="tryLogin()">Войти</button>
+            <div id="firstTimeMsg" class="hidden" style="color: #0f0; margin-top:10px;">Новый пользователь! Твой мастер-пароль: <b id="generatedPin"></b></div>
+        </div>
+
+        <!-- ГЛАВНЫЙ ЭКРАН (СЕЙФ) -->
+        <div id="vaultScreen" class="hidden">
+            <h2>🔐 Твой Сейф</h2>
+            <input type="text" id="searchInput" placeholder="🔍 Поиск по сервису...">
+            <div id="vault"></div>
+            <br>
+            <button onclick="openAddForm()">+ Добавить сервис</button>
+            <button onclick="saveToFile()" style="background: #28a745;">💾 Скачать файл</button>
+
+            <!-- ФОРМА ДОБАВЛЕНИЯ -->
+            <div id="addForm" class="hidden">
+                <input type="text" id="accName" placeholder="Название сайта / Сервиса">
+                <input type="text" id="accLogin" placeholder="Логин или Номер">
+                <input type="password" id="accPass" placeholder="Пароль">
+                <button onclick="addService()">Добавить</button>
+            </div>
+        </div>
+    </div>
+    <div id="status"></div>
+
+    <script>
+        // ДАННЫЕ
+        let masterPin = "";
+        let vaultData = [];
+        let isLoggedIn = false;
+
+        // Утилиты для формата пароля (авто-дефис)
+        function formatPin(input) {
+            let val = input.value.replace(/\D/g, ''); // Убираем всё, кроме цифр
+            if (val.length > 4) val = val.slice(0, 4);
+            if (val.length > 4) {
+                input.value = val.slice(0, 4) + '-' + val.slice(4);
+            } else {
+                input.value = val;
+            }
+        }
+
+        // Функция простого шифрования (XOR + Base64) для надёжности без сервера
+        function encrypt(text, key) {
+            let result = '';
+            for (let i = 0; i < text.length; i++) {
+                result += String.fromCharCode(text.charCodeAt(i) ^ key.charCodeAt(i % key.length));
+            }
+            return btoa(result);
+        }
+
+        function decrypt(encryptedText, key) {
+            let decoded = atob(encryptedText);
+            let result = '';
+            for (let i = 0; i < decoded.length; i++) {
+                result += String.fromCharCode(decoded.charCodeAt(i) ^ key.charCodeAt(i % key.length));
+            }
+            return result;
+        }
+
+        // ЛОГИН
+        function tryLogin() {
+            const pin = document.getElementById('pinInput').value.trim();
+            if (pin.length < 4) return;
+
+            // Первый вход (генерация пароля)
+            if (masterPin === "") {
+                masterPin = pin;
+                document.getElementById('generatedPin').innerText = masterPin;
+                document.getElementById('firstTimeMsg').classList.remove('hidden');
+                document.getElementById('status').innerText = "Ключ установлен!";
+                // Сразу показываем сейф
+                isLoggedIn = true;
+                showVault();
+                return;
+            }
+
+            // Сравниваем и проверяем
+            if (pin === masterPin) {
+                isLoggedIn = true;
+                document.getElementById('firstTimeMsg').classList.add('hidden');
+                showVault();
+            } else {
+                document.getElementById('status').innerText = "❌ Неверный PIN!";
+            }
+        }
+
+        function showVault() {
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('vaultScreen').classList.remove('hidden');
+
+            // Автоматическая генерация пароля при первом входе
+            if (vaultData.length === 0) {
+                let autoKey = "XXXX-" + Math.floor(1000 + Math.random() * 9000);
+                vaultData.push({ service: "Private Vault", login: "Мой пароль", pass: autoKey, added: true });
+                document.getElementById('status').innerText = "Авто-пароль сгенерирован: " + autoKey;
+            }
+
+            renderList();
+        }
+
+        // ПОИСК
+        document.getElementById('searchInput').addEventListener('input', renderList);
+
+        // ДОБАВЛЕНИЕ СЕРВИСА
+        function openAddForm() {
+            document.getElementById('addForm').classList.toggle('hidden');
+        }
+
+        function addService() {
+            let service = document.getElementById('accName').value;
+            let login = document.getElementById('accLogin').value;
+            let pass = document.getElementById('accPass').value;
+            if (!service || !login || !pass) return;
+
+            vaultData.push({ service, login, pass });
+            document.getElementById('accName').value = '';
+            document.getElementById('accLogin').value = '';
+            document.getElementById('accPass').value = '';
+            openAddForm();
+            renderList();
+        }
+
+        // РЕНДЕР СПИСКА (с +2 значками)
+        function renderList() {
+            let search = document.getElementById('searchInput').value.toLowerCase();
+            let html = "";
+
+            for (let i = 0; i < vaultData.length; i++) {
+                let item = vaultData[i];
+                if (item.service.toLowerCase().includes(search) || item.login.toLowerCase().includes(search)) {
+                    // Группировка +2
+                    let count = 0;
+                    for (let j = 0; j < vaultData.length; j++) {
+                        if (vaultData[j].service === item.service) count++;
+                    }
+                    let ext = count > 1 ? `<span style="color: #aaa; font-size: 12px;">+${count - 1}</span>` : "";
+
+                    html += `<div class="service-item">
+                                <span>${item.service} ${ext}</span>
+                                <button onclick="revealPass(${i})" style="width:auto;">👁</button>
+                            </div>`;
+                }
+            }
+            document.getElementById('vault').innerHTML = html || "<p>Нет данных</p>";
+        }
+
+        function revealPass(index) {
+            document.getElementById('status').innerText = "Логин: " + vaultData[index].login + " | Пароль: " + vaultData[index].pass;
+        }
+
+        // СОХРАНЕНИЕ В ФАЙЛ (Шифрование в TXT)
+        function saveToFile() {
+            let encryptedData = encrypt(JSON.stringify(vaultData), masterPin);
+            let blob = new Blob([encryptedData], { type: 'text/plain' });
+            let url = URL.createObjectURL(blob);
+            let a = document.createElement('a');
+            a.href = url;
+            a.download = "vault.txt";
+            a.click();
+            URL.revokeObjectURL(url);
+            document.getElementById('status').innerText = "✅ Файл зашифрован и скачан!";
+        }
+    </script>
 </body>
-</html>
+    </html>
